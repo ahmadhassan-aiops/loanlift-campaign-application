@@ -14,9 +14,8 @@ loan** (PR-AUC 0.991). The top 10% of scores hold 97% of the buyers.
   how many similar customers took the loan, the SHAP reasons, the contact channel and offer angles.
 - **Who buys**: the segments behind the model (income × card spending, education × family size, products) and a
   segment builder.
-- **Model performance**: held-out results, an interactive threshold trade-off, calibration, feature importance and
-  a fair comparison with the first version of the model.
-- **Data & method**: data, model search, corrections and limits.
+- **Model performance**: held-out results, an interactive threshold trade-off, calibration and feature importance.
+- **Data & method**: data, model search and limits.
 
 ## Why this stack
 

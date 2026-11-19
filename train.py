@@ -50,10 +50,6 @@ BASELINES = [  # best PR-AUC per algorithm, untuned, 5-fold cross-validation
     {"Model": "Decision tree (pruned)", "PR-AUC": 0.954}, {"Model": "AdaBoost", "PR-AUC": 0.894},
     {"Model": "Logistic regression", "PR-AUC": 0.849},
 ]
-EARLIER = {  # the first version's pipeline, re-created and scored on the same full test set
-    "Earlier approach": {"Recall": 0.969, "Precision": 0.560, "Targeted": 166, "Missed": 3},
-}
-
 
 def load(csv: Path) -> tuple[pd.DataFrame, pd.Series]:
     df = pd.read_csv(csv)
@@ -129,7 +125,6 @@ def main(csv: Path) -> None:
         "calibration": {k: [round(float(v), 4) for v in calib[k]] for k in calib.columns},
         "tuned": TUNED,
         "baselines": BASELINES,
-        "earlier": EARLIER,
     }
     (ROOT / "data" / "reference.json").write_text(json.dumps(reference, indent=2), encoding="utf-8")
     print(json.dumps(meta, indent=2))

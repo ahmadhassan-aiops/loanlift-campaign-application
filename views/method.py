@@ -1,4 +1,4 @@
-"""Data & method: the data, how the model was chosen, what was corrected, and the limits."""
+"""Data & method: the data, how the model was chosen, and the limits."""
 
 from __future__ import annotations
 
@@ -15,8 +15,7 @@ def render() -> None:
     ui.header(
         "LoanLift · data & method",
         "How LoanLift was built",
-        "The data, the model search, the corrections made to the first version of the notebook, and what the model "
-        "cannot do.",
+        "The data, the model search, and what the model cannot do.",
         page_icon="dataset",
     )
 
@@ -29,6 +28,8 @@ def render() -> None:
         "credit card from another bank. Money is in thousands of dollars.\n"
         "- **Not used:** `ID`; `Experience`, which is Age minus about 25 for every customer (correlation 0.99); and "
         "`ZIPCode`, whose regions all convert at 7.5% to 10.3%.\n"
+        "- **Every customer kept.** High-income and high-spending customers are real prospects, not outliers: the "
+        "377 beyond the usual IQR fences convert at 40% and hold 151 of the 480 buyers.\n"
         "- **Split:** 4,000 customers for training and 1,000 held out, stratified so both keep the 9.6% rate. "
         "Model choice, tuning and the threshold use 5-fold cross-validation on the training customers only."
     )
@@ -58,22 +59,6 @@ def render() -> None:
         f"{ref['test']['Recall']:.1%}, precision {ref['test']['Precision']:.1%}, PR-AUC {ref['test']['PR-AUC']:.3f}."
     )
 
-    ui.section("What was corrected in the first version")
-    ui.recommendations([
-        ("person_remove", "Outlier removal threw out the best prospects",
-         "Customers outside the IQR fences of income and card spending were removed before splitting: 377 customers "
-         "who convert at <b>40%</b>, holding <b>151 of the 480 buyers</b>. They are now kept."),
-        ("science", "The test set chose the model",
-         "The pruning strength was picked by recall on the test set, so the reported test score was optimistic. "
-         "All choices now use cross-validation on the training data."),
-        ("sync_alt", "Oversampling leaked into validation",
-         "SMOTE ran once before cross-validation, so synthetic customers built from validation rows were trained "
-         "on. Resampling now happens inside each fold, and the final model does not need it."),
-        ("rule", "Findings read the wrong way",
-         "The notebook said securities-account holders and mortgage holders buy less; both buy slightly more. "
-         "\"Customers with credit cards\" counted CD accounts. Each finding is now recomputed."),
-    ])
-
     ui.section("Limits")
     ui.md(
         "- **One campaign, one bank.** The model learned from a single campaign's 480 buyers. A different offer, "
@@ -87,7 +72,7 @@ def render() -> None:
     )
 
     ui.section("Code and notebook")
-    st.markdown(f"- [Notebook]({NOTEBOOK_URL}): the full analysis, corrections and model search\n"
+    st.markdown(f"- [Notebook]({NOTEBOOK_URL}): the full analysis and model search\n"
                 f"- [Project folder]({PROJECT_URL}) in the portfolio repository\n"
                 f"- [App code]({CODE_URL}): Streamlit app, inference package, `train.py` and tests")
     ui.footer()

@@ -1,4 +1,4 @@
-"""How good is the model: held-out results, threshold trade-off, calibration, importance and the earlier approach."""
+"""How good is the model: held-out results, threshold trade-off, calibration and importance."""
 
 from __future__ import annotations
 
@@ -68,18 +68,4 @@ def render() -> None:
         ui.cap("Income dominates; card spending, education and family size follow. Age and the product flags "
                "other than a CD account barely matter.")
 
-    ui.section("Against the first version of this model", "Same 1,000 held-out customers, same buyers")
-    e = ref["earlier"]["Earlier approach"]
-    pred = p >= m.threshold
-    table = pd.DataFrame({
-        "First version": [f"{e['Recall']:.1%}", f"{e['Precision']:.1%}", e["Targeted"], e["Missed"],
-                          "yes / no only"],
-        "LoanLift": [f"{recall_score(y, pred):.1%}", f"{precision_score(y, pred):.1%}", int(pred.sum()),
-                     int(((~pred) & (y == 1)).sum()), "calibrated probability"],
-    }, index=["Recall", "Precision", "Customers contacted", "Buyers missed", "Output"])
-    st.dataframe(table, width="stretch")
-    ui.note("The first version removed high-income and high-spending customers as \"outliers\" before training, "
-            "which took out 31% of the buyers, and picked its pruning on the test set. Re-created on the same "
-            f"training rows and scored on the full held-out set, it finds as many buyers but contacts "
-            f"<b>{e['Targeted']}</b> customers instead of <b>{int(pred.sum())}</b>.")
     ui.footer()

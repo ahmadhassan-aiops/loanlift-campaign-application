@@ -125,13 +125,5 @@
       "Model": "Logistic regression",
       "PR-AUC": 0.849
     }
-  ],
-  "earlier": {
-    "Earlier approach": {
-      "Recall": 0.969,
-      "Precision": 0.56,
-      "Targeted": 166,
-      "Missed": 3
-    }
-  }
+  ]
 }
