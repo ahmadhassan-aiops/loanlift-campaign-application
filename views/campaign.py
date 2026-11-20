@@ -113,29 +113,36 @@ def render() -> None:
                     f'chance is at least cost ÷ value = <b>{t:.1%}</b>. Everyone above that is contacted.</span></p>')
 
     s = campaign.summary(proba, contacted, econ, outcome)
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Customers to contact", f"{s['contacts']:,}", f"{s['share_contacted']:.0%} of {s['customers']:,}",
-              delta_color="off", delta_arrow="off")
-    if known:
-        k2.metric("Buyers reached", f"{s['actual_loans']} of {s['actual_all']}",
-                  f"{s['actual_share']:.0%} of all buyers", delta_color="off", delta_arrow="off")
-        k3.metric("Said yes", f"{s['actual_uptake']:.0%}", f"vs {s['actual_all'] / s['customers']:.1%} contacting all",
-                  delta_color="off", delta_arrow="off")
-        k4.metric("Campaign profit", _money(s['actual_profit']),
-                  f"{_money(s['actual_profit'] - s['actual_profit_all'], sign=True)} vs contacting all", delta_arrow="off")
-    else:
-        k2.metric("Expected loans", f"{s['expected_loans']:.0f}", f"{s['share_of_loans']:.0%} of the list's expected",
-                  delta_color="off", delta_arrow="off")
-        k3.metric("Expected to say yes", f"{s['uptake']:.0%}", f"vs {s['expected_all'] / s['customers']:.1%} contacting all",
-                  delta_color="off", delta_arrow="off")
-        k4.metric("Expected profit", _money(s['profit']), f"{_money(s['profit'] - s['profit_all'], sign=True)} vs contacting all",
-                  delta_arrow="off")
-    if known:
-        ui.cap("These are the 1,000 customers the model never saw in training, with what they really did in the last "
-               "campaign: the numbers are what this plan would have achieved. Profit uses your cost and value.")
-    else:
-        ui.cap("Expected loans add up each contacted customer's probability; the model's probabilities match real "
-               "uptake closely (see Model performance).")
+    with st.container(border=True):
+        ui.panel_head(2, "The campaign ledger", "What this plan would have achieved on the held-out list" if known
+                      else "What this plan is expected to achieve")
+        a, b = st.columns([1.5, 1], gap="large")
+        loans = s["actual_loans"] if known else s["expected_loans"]
+        loans_all = s["actual_all"] if known else s["expected_all"]
+        net = s["actual_profit"] if known else s["profit"]
+        net_all = s["actual_profit_all"] if known else s["profit_all"]
+        with a:
+            ui.ledger([
+                ("", "Customers on the list", "", f"{s['customers']:,}", ""),
+                ("", "Contacts", f"the top {s['share_contacted']:.0%} of the list by score, at {_money(cost)} each",
+                 f"{s['contacts']:,}", _money(-s["contacts"] * cost)),
+                ("", "Loans taken" if known else "Expected loans",
+                 f"{(s['actual_share'] if known else s['share_of_loans']):.0%} of all the list's buyers, at {_money(value)} each",
+                 f"{loans:,.0f}", _money(loans * value, sign=True)),
+                ("total", "Net result of this campaign", "", "", _money(net, sign=net > 0)),
+                ("sub", "Contacting every customer instead", f"{s['customers']:,} contacts, {loans_all:,.0f} loans", "",
+                 _money(net_all, sign=net_all > 0)),
+            ])
+        with b:
+            st.metric("Said yes" if known else "Expected to say yes", f"{(s['actual_uptake'] if known else s['uptake']):.0%}",
+                      f"vs {loans_all / s['customers']:.1%} if everyone is contacted", delta_color="off", delta_arrow="off")
+            st.metric("Better than contacting everyone", _money(net - net_all, sign=True), delta_arrow="off")
+        if known:
+            ui.cap("These are the 1,000 customers the model never saw in training, with what they really did in the last "
+                   "campaign: the ledger shows what this plan would have achieved. Amounts use your cost and value.")
+        else:
+            ui.cap("Expected loans add up each contacted customer's probability; the model's probabilities match real "
+                   "uptake closely (see Model performance).")
 
     # ---- Gains and profit ----------------------------------------------------------------------------------
     curve = campaign.gains(proba, outcome)
@@ -150,10 +157,10 @@ def render() -> None:
     best = int(np.argmax(profits))
 
     left, right = st.columns(2, gap="large")
-    with left:
+    with left, st.container(border=True):
         ui.section("Profit by campaign size", "Expected profit as you contact more customers, best scores first")
         ui.chart(charts.profit(counts, profits, s["contacts"], best), key="profit")
-    with right:
+    with right, st.container(border=True):
         ui.section("How the list scores", "Most customers are near 0%; buyers stand apart near 100%")
         ui.chart(charts.score_histogram(proba, t, outcome), key="hist")
     ui.insight(f"With a ${cost:,.0f} contact and a ${value:,.0f} loan, the most profitable campaign contacts the top "
@@ -162,7 +169,7 @@ def render() -> None:
 
     # ---- The list ------------------------------------------------------------------------------------------
     with st.container(border=True):
-        ui.panel_head(2, "Who to contact", "Ranked by chance of taking the loan; download the full scored list")
+        ui.panel_head(3, "Who to contact", "Ranked by chance of taking the loan; download the full scored list")
         contrib, _ = m.explain(rows)
         top_reason = contrib.idxmax(axis=1).map(SHORT)
         out = rows.assign(chance=proba, tier=[m.tier(p) for p in proba], contact=np.where(contacted, "Yes", "No"),

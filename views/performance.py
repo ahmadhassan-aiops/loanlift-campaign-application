@@ -42,26 +42,27 @@ def render() -> None:
              delta_arrow="off")
     d.metric("Top 10% of scores", f"{top['actual_share']:.0%}", "of all buyers", delta_color="off", delta_arrow="off")
 
-    ui.section("Choose the threshold", "Lower it to reach more buyers, raise it to waste fewer contacts")
-    t = st.slider("Contact customers at or above", 0.01, 0.95, m.threshold, 0.01, key="perf_t")
-    left, right = st.columns([1.25, 1], gap="large")
-    left.plotly_chart(charts.tradeoff(_curve(y, p), t), theme=None, config=charts.CONFIG, key="tradeoff")
-    tn, fp, fn, tp = confusion_matrix(y, p >= t).ravel()
-    right.plotly_chart(charts.confusion(tn, fp, fn, tp), theme=None, config=charts.CONFIG, key="cm")
-    ui.insight(f"At {t:.2f} the campaign contacts <b>{tp + fp}</b> of {len(y):,} customers and reaches <b>{tp} of "
-               f"{tp + fn} buyers</b>; {fp} contacts say no. The recommended {m.threshold:.2f} was chosen in "
-               "cross-validation (highest F2, which weighs a missed buyer twice as much as a wasted contact), "
-               "before the test set was opened.")
+    with st.container(border=True):
+        ui.section("Choose the threshold", "Lower it to reach more buyers, raise it to waste fewer contacts")
+        t = st.slider("Contact customers at or above", 0.01, 0.95, m.threshold, 0.01, key="perf_t")
+        left, right = st.columns([1.25, 1], gap="large")
+        left.plotly_chart(charts.tradeoff(_curve(y, p), t), theme=None, config=charts.CONFIG, key="tradeoff")
+        tn, fp, fn, tp = confusion_matrix(y, p >= t).ravel()
+        right.plotly_chart(charts.confusion(tn, fp, fn, tp), theme=None, config=charts.CONFIG, key="cm")
+        ui.insight(f"At {t:.2f} the campaign contacts <b>{tp + fp}</b> of {len(y):,} customers and reaches <b>{tp} of "
+                   f"{tp + fn} buyers</b>; {fp} contacts say no. The recommended {m.threshold:.2f} was chosen in "
+                   "cross-validation (highest F2, which weighs a missed buyer twice as much as a wasted contact), "
+                   "before the test set was opened.")
 
     left, right = st.columns(2, gap="large")
-    with left:
+    with left, st.container(border=True):
         ui.section("Can the percentages be trusted?", "Predicted against actual uptake, out of fold")
         cal = ref["calibration"]
         ui.chart(charts.calibration(cal["predicted"], cal["observed"], cal["customers"]), key="cal")
         ui.cap(f"{int(cal['customers'][0]):,} of 4,000 training customers score under 2% and none of them took the loan; "
                f"{int(cal['customers'][-1]):,} score over 90% and {cal['observed'][-1]:.0%} of them did. The thin middle "
                "(124 customers between 10% and 50%) is within about 4 to 9 points.")
-    with right:
+    with right, st.container(border=True):
         ui.section("What the model relies on", "Average impact of each feature on the score")
         imp = ref["importance"]
         ui.chart(charts.importance([SHORT[k] for k in imp], list(imp.values())), key="imp")

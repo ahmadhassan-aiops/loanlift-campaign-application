@@ -64,34 +64,36 @@ def render() -> None:
                "climbs fast. Card spending over <b>$3K a month</b> matters most in the middle: on $75K to $125K it "
                "lifts uptake to about 30%, from under 15% for most lower spenders. On low incomes it does little.")
 
-    ui.section("Among high earners, who says yes?", "Customers earning over the income you choose, by education "
-                                                    "and family size")
-    floor = st.select_slider("Income over", options=[75, 100, 125, 150], value=100, format_func=lambda v: f"${v}K")
-    high = df[df["Income"] > floor]
-    edu = high["Education"].map(EDUCATION)
-    r2 = high.pivot_table(index=edu, columns="Family", values="took_loan", aggfunc="mean").reindex(list(EDUCATION.values()))
-    c2 = high.pivot_table(index=edu, columns="Family", values="took_loan", aggfunc="size").reindex(list(EDUCATION.values()))
-    ui.chart(charts.uptake_heatmap(r2, c2, "Family size", "Education", height=280), key="edu_family")
-    single_ug = (high["Education"] == 1) & (high["Family"] <= 2)
-    ui.insight(f"Over ${floor}K, undergraduates in families of 1 or 2 take the loan at "
-               f"<b>{high.loc[single_ug, 'took_loan'].mean():.0%}</b> ({single_ug.sum():,} customers). Everyone else "
-               f"on these incomes, graduates and professionals or larger families, takes it at "
-               f"<b>{high.loc[~single_ug, 'took_loan'].mean():.0%}</b>. A high income is necessary, not sufficient: "
-               "the loan has to meet a need.")
-
-    ui.section("Products and channels", "Uptake by each product the customer holds")
-    labels, vals, ns = [], [], []
-    for col, name in (("CD_Account", "CD account"), ("Securities_Account", "Securities account"),
-                      ("Online", "Online banking"), ("CreditCard", "Other bank's card")):
-        for flag, word in ((1, "with"), (0, "without")):
-            part = df[df[col] == flag]
-            labels.append(f"{name}<br>{word}")
-            vals.append(part["took_loan"].mean())
-            ns.append(len(part))
-    ui.chart(charts.uptake_bars(labels, vals, ns, avg), key="products")
-
-    ui.section("Build a segment", "Pick a target group and see how many buyers it holds")
     with st.container(border=True):
+        ui.section("Among high earners, who says yes?", "Customers earning over the income you choose, by education "
+                                                        "and family size")
+        floor = st.select_slider("Income over", options=[75, 100, 125, 150], value=100, format_func=lambda v: f"${v}K")
+        high = df[df["Income"] > floor]
+        edu = high["Education"].map(EDUCATION)
+        r2 = high.pivot_table(index=edu, columns="Family", values="took_loan", aggfunc="mean").reindex(list(EDUCATION.values()))
+        c2 = high.pivot_table(index=edu, columns="Family", values="took_loan", aggfunc="size").reindex(list(EDUCATION.values()))
+        ui.chart(charts.uptake_heatmap(r2, c2, "Family size", "Education", height=280), key="edu_family")
+        single_ug = (high["Education"] == 1) & (high["Family"] <= 2)
+        ui.insight(f"Over ${floor}K, undergraduates in families of 1 or 2 take the loan at "
+                   f"<b>{high.loc[single_ug, 'took_loan'].mean():.0%}</b> ({single_ug.sum():,} customers). Everyone else "
+                   f"on these incomes, graduates and professionals or larger families, takes it at "
+                   f"<b>{high.loc[~single_ug, 'took_loan'].mean():.0%}</b>. A high income is necessary, not sufficient: "
+                   "the loan has to meet a need.")
+
+    with st.container(border=True):
+        ui.section("Products and channels", "Uptake by each product the customer holds")
+        labels, vals, ns = [], [], []
+        for col, name in (("CD_Account", "CD account"), ("Securities_Account", "Securities account"),
+                          ("Online", "Online banking"), ("CreditCard", "Other bank's card")):
+            for flag, word in ((1, "with"), (0, "without")):
+                part = df[df[col] == flag]
+                labels.append(f"{name}<br>{word}")
+                vals.append(part["took_loan"].mean())
+                ns.append(len(part))
+        ui.chart(charts.uptake_bars(labels, vals, ns, avg), key="products")
+
+    with st.container(border=True):
+        ui.section("Build a segment", "Pick a target group and see how many buyers it holds")
         a, b = st.columns(2)
         inc_rng = a.slider("Annual income ($000)", 0, 230, (100, 230), step=5)
         sp_rng = b.slider("Card spending per month ($000)", 0.0, 10.0, (0.0, 10.0), step=0.5)

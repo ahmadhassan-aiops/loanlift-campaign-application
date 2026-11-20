@@ -19,7 +19,7 @@ INK_2 = "#52514e"
 MUTED = "#898781"
 GRID = "#e1e0d9"
 AXIS = "#c3c2b7"
-SURFACE = "#fcfcfb"
+SURFACE = "#fffef8"
 
 FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
 CONFIG = {"displayModeBar": False, "scrollZoom": False}

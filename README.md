@@ -7,9 +7,12 @@ Bank's depositors took a personal loan in the last campaign. A tuned XGBoost pip
 and tested once on 1,000 it never saw, **finds 97% of the buyers, and 90% of the customers it targets take the
 loan** (PR-AUC 0.991). The top 10% of scores hold 97% of the buyers.
 
+The app looks like a **banker's ledger**: ruled ledger sheets with a red double margin, serif folios, rubber-stamp
+labels, and the campaign itself written up as a ledger (contacts as spend, loans as income, the net result double
+underlined).
+
 - **Plan a campaign**: pick a customer list (the held-out customers, with their real response, or your own CSV),
-  contact by score, by budget or by profit (cost per contact against value per loan), see buyers reached, uptake
-  and profit, the gains and profit curves, and download the ranked list with each customer's strongest reason.
+  contact by score, by budget or by profit (cost per contact against value per loan), see the campaign ledger (spend, income, net against contacting everyone), the gains and profit curves, and download the ranked list with each customer's strongest reason.
 - **Check a customer**: enter a profile; get the chance of a yes shown as "out of 100 customers like this", a tier,
   how many similar customers took the loan, the SHAP reasons, the contact channel and offer angles.
 - **Who buys**: the segments behind the model (income × card spending, education × family size, products) and a
@@ -40,7 +43,7 @@ loanlift/schema.py     pydantic customer schema, labels, upload validation
 loanlift/model.py      loads the pipeline, scores, explains (SHAP), tiers
 loanlift/campaign.py   selection by threshold or budget, expected loans and profit, gains curve
 loanlift/offers.py     contact channel and offer angles for a customer
-lib/                   UI kit, charts, theme, cached loaders, links
+lib/                   ledger UI kit (sheets, folios, stamps, campaign ledger), charts, theme, cached loaders, links
 model/                 loan_propensity_xgb.joblib + metadata.json (threshold, metrics, versions)
 data/                  held-out customers with scores, all customers, reference statistics
 train.py               rebuilds model/ and data/ from the raw CSV
