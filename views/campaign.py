@@ -87,7 +87,7 @@ def render() -> None:
     # ---- Targeting controls ------------------------------------------------------------------------------
     with st.container(border=True):
         ui.panel_head(1, "Set the campaign", "Choose who to contact, and what a contact costs and a loan earns")
-        a, b, c = st.columns([1.3, 1, 1])
+        a, b, c = st.columns([1.75, 1, 1])
         with a:
             mode = st.segmented_control("Contact customers", ["Above a score", "Top N customers", "Most profitable"],
                                         default="Above a score", required=True, key="mode")
